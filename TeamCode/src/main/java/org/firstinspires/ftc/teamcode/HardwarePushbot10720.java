@@ -92,8 +92,7 @@ public class HardwarePushbot10720
 
      //   lift_motor_r.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
      //   lift_motor_l1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-      //  catMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        catMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //   armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
