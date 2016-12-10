@@ -60,7 +60,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Pushbot: Amay Auto Drive By Time", group="Pushbot")
 //@Disabled
-public class AmayPushbotAutoDriveByTime_Linear extends LinearOpMode {
+public class
+AmayPushbotAutoDriveByTime_Linear extends LinearOpMode {
 
     /* Declare OpMode members. */
 //    org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot robot   = new HardwarePushbot();   // Use a Pushbot's hardware
