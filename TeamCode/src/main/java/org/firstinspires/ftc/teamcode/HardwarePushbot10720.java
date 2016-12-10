@@ -66,7 +66,7 @@ public class HardwarePushbot10720
       //  lift_motor_r = hwMap.dcMotor.get("lift_motor_r");
       //  lift_motor_l1 = hwMap.dcMotor.get("lift_motor_l1");
 
-      //  catMotor    = hwMap.dcMotor.get("cat_motor");
+        catMotor    = hwMap.dcMotor.get("cat_motor");
 
 
         //Sensor_blue    = hwMap.colorSensor.get("Sensor_right");
