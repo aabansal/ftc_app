@@ -119,7 +119,7 @@ public class HardwarePushbot10720
         if (remaining > 0)
             Thread.sleep(remaining);
 
-        // Reset the cycle clock for the next pass.
+        // Reset the cycle clock for the next pass..
         period.reset();
     }
 }
