@@ -97,9 +97,10 @@ public class Teleop extends LinearOpMode {
             rightMotor.setPower(-gamepad1.left_stick_y);
             leftMotor.setPower(gamepad1.right_stick_x);
             rightMotor.setPower(gamepad1.right_stick_x);
-            catMotor.setPower(0.5 * gamepad1.right_trigger);
+            catMotor.setPower(gamepad1.right_trigger);
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
+            //PRANAV IS FAT
         }
     }
 }
