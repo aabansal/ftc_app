@@ -1,10 +1,3 @@
-package org.firstinspires.ftc.teamcode;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.util.ElapsedTime;
-
 /*
 Copyright (c) 2016 Robert Atkinson
 
@@ -36,13 +29,14 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+package org.firstinspires.ftc.teamcode;
 
-
-        import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-        import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-        import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-        import com.qualcomm.robotcore.hardware.DcMotor;
-        import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -55,16 +49,15 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
+ */
 
-@TeleOp(name="Template: Teleop Final", group="Linear Opmode")  // @Autonomous(...) is the other common choice
-public class Teleop extends LinearOpMode {
+@TeleOp(name="Template: Linear OpMode", group="Linear Opmode")  // @Autonomous(...) is the other common choice
+public class MyFirstOpmode extends LinearOpMode {
 
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
-    DcMotor leftMotor = null;
-    DcMotor rightMotor = null;
-    DcMotor catMotor = null;
-    DcMotor sensorMotor = null;
+     DcMotor leftMotor = null;
+     DcMotor rightMotor = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -75,10 +68,9 @@ public class Teleop extends LinearOpMode {
          * to 'get' must correspond to the names assigned during the robot configuration
          * step (using the FTC Robot Controller app on the phone).
          */
-        rightMotor  = hardwareMap.dcMotor.get("right_drive");
-        leftMotor  = hardwareMap.dcMotor.get("left_drive");
-        catMotor  = hardwareMap.dcMotor.get("cat_drive");
-        sensorMotor = hardwareMap.dcMotor.get("sensor_drive");
+         rightMotor  = hardwareMap.dcMotor.get("right_drive");
+         leftMotor  = hardwareMap.dcMotor.get("left_drive");
+
         // eg: Set the drive motor directions:
         // "Reverse" the motor that runs backwards when connected directly to the battery
         // leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
@@ -93,21 +85,12 @@ public class Teleop extends LinearOpMode {
             telemetry.update();
 
             // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
-            //set power to motors
-            leftMotor.setPower(gamepad1.left_stick_y);
-            rightMotor.setPower(-gamepad1.left_stick_y);
-            leftMotor.setPower(gamepad1.right_stick_x);
-            rightMotor.setPower(gamepad1.right_stick_x);
-            catMotor.setPower(gamepad1.right_trigger);
-            if (gamepad1.dpad_down)
-                sensorMotor.setPower(1.0);
-            if (gamepad1.dpad_up)
-                sensorMotor.setPower(-1.0);
-//abhinav is fat and fat.
+             leftMotor.setPower(-gamepad1.left_stick_y);
+             rightMotor.setPower(gamepad1.right_stick_y);
+          //  leftMotor.setPower(gamepad1.right_stick_x);
+          //  rightMotor.setPower(-gamepad1.right_stick_x);
 
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
     }
 }
-
-
