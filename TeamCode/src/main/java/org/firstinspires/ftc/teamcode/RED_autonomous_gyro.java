@@ -78,7 +78,7 @@ public class RED_autonomous_gyro extends LinearOpMode {
     HardwarePushbot10720         robot   = new HardwarePushbot10720();   // Use a Pushbot's hardware
     ModernRoboticsI2cGyro   gyro    = null;                    // Additional Gyro device
 
-    static final double     COUNTS_PER_MOTOR_REV    = 295 ;    // eg: TETRIX Motor Encoder
+    static final double     COUNTS_PER_MOTOR_REV    = 520 ; //520  http://files.andymark.com/am-2964_testing.pdf    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 2.0 ;     // This is < 1.0 if geared UP
     static final double     WHEEL_DIAMETER_INCHES   = 4.0 ;     // For figuring circumference
     static final double     COUNTS_PER_INCH         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
@@ -122,7 +122,6 @@ public class RED_autonomous_gyro extends LinearOpMode {
             idle();
         }
         telemetry.addData(">", "Robot Ready.");    //
-        telemetry.update();
 
         // Wait for the game to start (Display Gyro value), and reset gyro before we move..
         while (!isStarted()) {
@@ -142,10 +141,48 @@ public class RED_autonomous_gyro extends LinearOpMode {
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
         // Put a hold after each turn
         // convert the RGB values to HSV values.
+/*
+        while (opModeIsActive())
+        {
+            telemetry.addData("heading mode", gyro.getHeadingMode().toString());
+            telemetry.addData("integrated z axix value", " == %7d  heading == %7d", gyro.getIntegratedZValue(), gyro.getHeading());
+            telemetry.addData("raw values", "x = %7d  y = %7d z=%7d", gyro.rawX(), gyro.rawY(), gyro.rawZ());
+            telemetry.update();
+        }
+*/
 
-        gyroDrive(DRIVE_SPEED, 37.0, 0.0);    // Drive FWD 48 inches
+        NewgyroDrive(DRIVE_SPEED, 15.0, 0.0);    // Drive FWD 5 inches
+        sleep(2000);
+        NewgyroTurn(TURN_SPEED, 90);
+        sleep(2000);
+        NewgyroDrive(DRIVE_SPEED, 15.0, 0.0);    // Drive FWD 25 inches
+        sleep(2000);
+        NewgyroTurn(TURN_SPEED, -90);
+        sleep(2000);
+        NewgyroDrive(DRIVE_SPEED, -15.0, 0.0);    // Drive REV 25 inches
+        // set the encoder value based on the distance and set the encoders
+        // loop till the encoder values are not met
+        // while (not reached or stopped)
+        //    get z value to see if we are not steering in the right angle
+        //    if not then move the robot to make sure that the heading is correct
+        //    look at the encoder value to see if the distance is reached
+        //    if overshort go back
+
+
+/*        gyroDrive(DRIVE_SPEED, 5.0, 0.0);    // Drive FWD 48 inches
         telemetry.addData(">", "reached dest");
         telemetry.update();
+        Thread.sleep(1000);
+        gyroDrive(DRIVE_SPEED, -5.0, 0.0);    // Drive FWD 48 inches
+        telemetry.addData(">", "reached dest");
+        telemetry.update();
+
+        Thread.sleep(1000);
+        gyroDrive(DRIVE_SPEED, 5.0, 0.0);    // Drive FWD 48 inches
+        telemetry.addData(">", "reached dest");
+        telemetry.update();
+  */
+    /*
         gyroTurn(TURN_SPEED, 90.0);  // turn right
         telemetry.addData(">", "reached dest");
         telemetry.update();
@@ -163,7 +200,211 @@ public class RED_autonomous_gyro extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
+*/
+    }
 
+    public void NewgyroDrive ( double speed,
+                            double distance,
+                            double angle) throws InterruptedException {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+        double  zvalue;
+
+        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
+            newLeftTarget = robot.leftMotor.getCurrentPosition() + moveCounts;
+            newRightTarget = robot.rightMotor.getCurrentPosition() + moveCounts;
+
+            telemetry.addData(">>",  "setting new largets Left RIGHT");
+
+            telemetry.addData("Target",  "MoveCount:%7d:  LEFT:%7d:  RIGHT:%7d",    moveCounts,  newLeftTarget,  newRightTarget);
+            telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                    robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+            // Set Target and Turn On RUN_TO_POSITION
+            robot.leftMotor.setTargetPosition(newLeftTarget);
+            robot.rightMotor.setTargetPosition(-1*newRightTarget);
+
+            robot.leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            robot.leftMotor.setPower(speed);
+            robot.rightMotor.setPower(-1*speed);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (robot.leftMotor.isBusy() && robot.rightMotor.isBusy())) {
+
+                zvalue = gyro.getIntegratedZValue();
+                if (distance > 0) {
+                    if (zvalue < 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.leftMotor.setPower(1.1 * speed);
+                        telemetry.addData("Steering Left gave more power to right motor ",zvalue);
+                    }
+                    if (zvalue > 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(-1.1 * speed);
+                        telemetry.addData("Steering right gave more power to left motor ",zvalue);
+                    }
+                    if (zvalue == 0) {
+                        robot.leftMotor.setPower(speed);
+                        robot.rightMotor.setPower(-1 * speed);
+                    }
+                }
+                if (distance < 0) {
+                    if (zvalue < 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(-1.1 * speed);
+                    }
+                    if (zvalue > 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.leftMotor.setPower(1.1 * speed);
+                    }
+                    if (zvalue == 0) {
+                        robot.leftMotor.setPower(speed);
+                        robot.rightMotor.setPower(-1 * speed);
+                    }
+                }
+
+
+                // Display drive status for the driver.
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                        robot.rightMotor.getCurrentPosition(), gyro.getIntegratedZValue());
+                telemetry.update();
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            robot.leftMotor.setPower(0);
+            robot.rightMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            telemetry.addData(">>",  "after move new largets Left RIGHT");
+            telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+            telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                    robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+
+        }
+    }
+
+    public void NewgyroTurn ( double speed,
+                               double angle) throws InterruptedException {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+        double  zvalue;
+        boolean turned;
+        double absdiff;
+
+        turned = false;
+        gyro.resetZAxisIntegrator(); // zero the angle
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (!turned)) {
+
+                zvalue = gyro.getIntegratedZValue();
+                absdiff = Math.abs((Math.abs(zvalue) - Math.abs(angle)));
+                if (angle > 0) // turn Left i.e. give power to right motor only
+                {
+                    if (zvalue < angle) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(speed);
+                        robot.leftMotor.setPower(0);
+                        telemetry.addData("not turned enough zvalue less than angle",zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                    if (zvalue > angle) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(0);
+                        robot.leftMotor.setPower(-1 * speed);
+                        telemetry.addData("turned too much zvalue is more than angle", zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                    if (Math.abs(Math.abs(zvalue) - Math.abs(angle)) == 0) {
+                        turned = true;
+                        robot.leftMotor.setPower(0);
+                        robot.rightMotor.setPower(0);
+                        telemetry.addData("Reached angle ", zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                }
+                if (angle < 0) // turn right i.e. give power to left motor only
+                {
+                    if (zvalue > angle) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(0);
+                        robot.leftMotor.setPower(-1 * speed);
+                        telemetry.addData("not turned enough zvalue less than angle",zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                    if (zvalue < angle) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.leftMotor.setPower(0);
+                        robot.rightMotor.setPower(1 * speed);
+                        telemetry.addData("not turned enough zvalue less than angle",zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                    if (Math.abs(Math.abs(zvalue) - Math.abs(angle)) == 0) {
+                        turned = true;
+                        robot.leftMotor.setPower(0);
+                        robot.rightMotor.setPower(0);
+                        telemetry.addData("Reached angle ", zvalue);
+                        telemetry.addData("abs diff", absdiff);
+                        telemetry.update();
+                    }
+                }
+
+
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            robot.leftMotor.setPower(0);
+            robot.rightMotor.setPower(0);
+
+        }
     }
 
     public String getcolor(int blue, int red, int green)
@@ -176,6 +417,138 @@ public class RED_autonomous_gyro extends LinearOpMode {
         if (red > blue && red > green && red >= 3)  return "Red";
         else return "Unknown";
     }
+
+    public void NewgyroSensorDrive ( double speed,
+                               double distance,
+                               double angle) throws InterruptedException {
+
+        int     newLeftTarget;
+        int     newRightTarget;
+        int     moveCounts;
+        double  max;
+        double  error;
+        double  steer;
+        double  leftSpeed;
+        double  rightSpeed;
+        double  zvalue;
+        boolean ispressed;
+
+        ispressed = false;
+
+        robot.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // Ensure that the opmode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            moveCounts = (int)(distance * COUNTS_PER_INCH);
+            newLeftTarget = robot.leftMotor.getCurrentPosition() + moveCounts;
+            newRightTarget = robot.rightMotor.getCurrentPosition() + moveCounts;
+
+            telemetry.addData(">>",  "setting new largets Left RIGHT");
+
+            telemetry.addData("Target",  "MoveCount:%7d:  LEFT:%7d:  RIGHT:%7d",    moveCounts,  newLeftTarget,  newRightTarget);
+            telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                    robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+            // Set Target and Turn On RUN_TO_POSITION
+            robot.leftMotor.setTargetPosition(newLeftTarget);
+            robot.rightMotor.setTargetPosition(-1*newRightTarget);
+
+            robot.leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            robot.rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+            // start motion.
+            speed = Range.clip(Math.abs(speed), 0.0, 1.0);
+            robot.leftMotor.setPower(speed);
+            robot.rightMotor.setPower(-1*speed);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (robot.leftMotor.isBusy() && robot.rightMotor.isBusy())) {
+
+                for (int i = 0; i< 2; i++) {
+
+                    beaconcolor = getcolor(robot.sensor.blue(), robot.sensor.red(), robot.sensor.green());
+                    //  sleep(1000);
+                    telemetry.addData(">", "read color %s", beaconcolor);
+                    telemetry.update();
+                }
+                if ((ispressed == false) && ( beaconcolor == "Red")) {
+                    robot.leftMotor.setPower(0);
+                    robot.rightMotor.setPower(0);
+                    telemetry.addData("It Sensed Color ", "Now pushing the beacon button" );
+                    telemetry.update();
+                    robot.sensorMotor.setPower(-0.1);
+                    sleep(2400);
+                    robot.sensorMotor.setPower(0.1);
+                    sleep(2400);
+                    robot.sensorMotor.setPower(0);
+                    ispressed = true;
+                }
+                telemetry.addData("End of Color Sensor Code", "Done Color Detection" );
+                telemetry.update();
+
+                zvalue = gyro.getIntegratedZValue();
+                if (distance > 0) {
+                    if (zvalue < 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.leftMotor.setPower(1.1 * speed);
+                        telemetry.addData("Steering Left gave more power to right motor ",zvalue);
+                    }
+                    if (zvalue > 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(-1.1 * speed);
+                        telemetry.addData("Steering right gave more power to left motor ",zvalue);
+                    }
+                    if (zvalue == 0) {
+                        robot.leftMotor.setPower(speed);
+                        robot.rightMotor.setPower(-1 * speed);
+                    }
+                }
+                if (distance < 0) {
+                    if (zvalue < 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.rightMotor.setPower(-1.1 * speed);
+                    }
+                    if (zvalue > 0) {
+                        // steer to left i.e. give more power to the right motor
+                        robot.leftMotor.setPower(1.1 * speed);
+                    }
+                    if (zvalue == 0) {
+                        robot.leftMotor.setPower(speed);
+                        robot.rightMotor.setPower(-1 * speed);
+                    }
+                }
+
+
+                // Display drive status for the driver.
+                telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+                telemetry.addData("Actual",  "%7d:%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                        robot.rightMotor.getCurrentPosition(), gyro.getIntegratedZValue());
+                telemetry.update();
+
+                // Allow time for other processes to run.
+                idle();
+            }
+
+            // Stop all motion;
+            robot.leftMotor.setPower(0);
+            robot.rightMotor.setPower(0);
+
+            // Turn off RUN_TO_POSITION
+            robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            telemetry.addData(">>",  "after move new largets Left RIGHT");
+            telemetry.addData("Target",  "%7d:%7d",      newLeftTarget,  newRightTarget);
+            telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
+                    robot.rightMotor.getCurrentPosition());
+            telemetry.update();
+
+        }
+    }
+
 
     public void gyroSensorDrive ( double speed,
                             double distance,
@@ -342,7 +715,6 @@ public class RED_autonomous_gyro extends LinearOpMode {
             telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
                     robot.rightMotor.getCurrentPosition());
             telemetry.update();
-            sleep(1000);
             // Set Target and Turn On RUN_TO_POSITION
             robot.leftMotor.setTargetPosition(newLeftTarget);
             robot.rightMotor.setTargetPosition(-1*newRightTarget);
@@ -387,6 +759,7 @@ public class RED_autonomous_gyro extends LinearOpMode {
                 telemetry.addData("Actual",  "%7d:%7d",      robot.leftMotor.getCurrentPosition(),
                                                              robot.rightMotor.getCurrentPosition());
                 telemetry.addData("Speed",   "%5.2f:%5.2f",  leftSpeed, rightSpeed);
+                sleep(2000);
                 telemetry.update();
 
                 // Allow time for other processes to run.
