@@ -36,9 +36,7 @@ public class robotMovements{//} extends LinearOpMode{
     static final double     P_DRIVE_COEFF           = 0.08;     // Larger is more responsive, but also less stable
     String beaconcolor = null;
 
-    public void NewgyroDrive ( double speed,
-                                   double distance,
-                                   double angle, Telemetry telemetry) throws InterruptedException {
+    public void NewgyroDrive (double speed, double distance, double angle, Telemetry telemetry) throws InterruptedException {
 
         int     newLeftTarget;
         int     newRightTarget;
@@ -80,8 +78,7 @@ public class robotMovements{//} extends LinearOpMode{
             robot.rightMotor.setPower(-1*speed);
 
             // keep looping while we are still active, and BOTH motors are running.
-            while (//opModeIsActive() &&
-                    (robot.leftMotor.isBusy() && robot.rightMotor.isBusy())) {
+            while (/*opModeIsActive()*/ (robot.leftMotor.isBusy() && robot.rightMotor.isBusy())) {
 
                 zvalue = gyro.getIntegratedZValue();
                 if (distance > 0) {
@@ -91,7 +88,7 @@ public class robotMovements{//} extends LinearOpMode{
                         telemetry.addData("Steering Left gave more power to right motor ",zvalue);
                     }
                     if (zvalue > 0) {
-                        // steer to left i.e. give more power to the right motor
+                      // steer to left i.e. give more power to the right motor
                         robot.rightMotor.setPower(-1.1 * speed);
                         telemetry.addData("Steering right gave more power to left motor ",zvalue);
                     }
@@ -143,8 +140,7 @@ public class robotMovements{//} extends LinearOpMode{
         }
     }
 
-    public void NewgyroTurn ( double speed,
-                              double angle, Telemetry telemetry) throws InterruptedException {
+    public void NewgyroTurn ( double speed, double angle, Telemetry telemetry) throws InterruptedException {
 
         int     newLeftTarget;
         int     newRightTarget;
@@ -169,8 +165,7 @@ public class robotMovements{//} extends LinearOpMode{
             speed = Range.clip(Math.abs(speed), 0.0, 1.0);
 
             // keep looping while we are still active, and BOTH motors are running.
-            while (//opModeIsActive() &&
-                    (!turned)) {
+            while (/*opModeIsActive() &&*/(!turned)) {
 
                 zvalue = gyro.getIntegratedZValue();
                 absdiff = Math.abs((Math.abs(zvalue) - Math.abs(angle)));
@@ -418,7 +413,7 @@ public class robotMovements{//} extends LinearOpMode{
             Thread.yield();
             //idle();
         }
-        telemetry.addData(">", "Calibrated Gyro");    //
+        telemetry.addData(">", "Calibrated Gyro");
         telemetry.update();
 
         gyro.resetZAxisIntegrator();
@@ -426,6 +421,6 @@ public class robotMovements{//} extends LinearOpMode{
         robot.leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         robot.rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        telemetry.addData(">", "Robot Ready.");    //
+        telemetry.addData(">", "Robot Ready.");
     }
 }
