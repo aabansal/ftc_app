@@ -66,7 +66,7 @@ public class Teleop extends LinearOpMode {
     DcMotor rightMotor = null;
     DcMotor catMotor = null;
     DcMotor sensorMotor = null;
-
+    double speed = 0.25;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
@@ -95,17 +95,31 @@ public class Teleop extends LinearOpMode {
 
             // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
             //set power to motors
-            leftMotor.setPower(gamepad1.left_stick_y);
-            rightMotor.setPower(-gamepad1.left_stick_y);
+            if (gamepad1.left_stick_y < 0.0)
+            {
+                leftMotor.setPower(0.0 - speed);
+                rightMotor.setPower(0.0 + speed);
+            }
+            else if (gamepad1.left_stick_y > 0.0)
+            {
+                leftMotor.setPower(0.0 + speed);
+                rightMotor.setPower(0.0 - speed);
+            }
             leftMotor.setPower(gamepad1.right_stick_x);
             rightMotor.setPower(gamepad1.right_stick_x);
             catMotor.setPower(gamepad1.right_trigger);
             if (gamepad1.dpad_down)
                 sensorMotor.setPower(1.0);
-            if (gamepad1.dpad_up)
+            else if (gamepad1.dpad_up)
                 sensorMotor.setPower(-1.0);
-//abhinav is fat and fat.
-
+            if (gamepad1.dpad_right)
+            {
+                speed += 0.01;
+            }
+            else if (gamepad1.dpad_left)
+            {
+                speed -= 0.01;
+            }
             idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
         }
     }
