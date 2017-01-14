@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -23,24 +26,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class HardwarePushbot10720
 {
     /* Public OpMode members. */
-    public DcMotor leftMotor   = null;
+    public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
-
-    //lift motors
-
-    public DcMotor lift_motor_r = null;
-    public DcMotor lift_motor_l1 =null;
-
-    //catapult motors
-
-    public DcMotor  catMotor    = null;
-
-    //public ColorSensor Sensor_blue  = null;
+    public ColorSensor sensor  = null;
+    public DcMotor sensorMotor = null;
+    public DcMotor catMotor = null;
     //public ColorSensor  Sensor_red    = null;
-    //public GyroSensor Gyro   = null;
+    public GyroSensor Gyro   = null;
     //public ColorSensor  Sensor_white_front   = null;
     //public ColorSensor  Sensor_white_back = null;
     //public ColorSensor  getSensor_red_front = null;
+
    /* public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
     public static final double ARM_DOWN_POWER  = -0.45 ;*/
@@ -62,38 +58,26 @@ public class HardwarePushbot10720
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
         rightMotor  = hwMap.dcMotor.get("right_drive");
-
-      //  lift_motor_r = hwMap.dcMotor.get("lift_motor_r");
-      //  lift_motor_l1 = hwMap.dcMotor.get("lift_motor_l1");
-
-        catMotor    = hwMap.dcMotor.get("cat_motor");
-
-
-        //Sensor_blue    = hwMap.colorSensor.get("Sensor_right");
-        //Sensor_red  = hwMap.colorSensor.get("Sensor_left")
-        //Gyro  = hwMap.gyroSensor.get("Gyro_sensor)")=
+        sensor = hwMap.colorSensor.get("sensor");
+        sensorMotor = hwMap.dcMotor.get("sensor_drive");
+        catMotor = hwMap.dcMotor.get("cat_drive");
+       // Sensor_blue    = hwMap.colorSensor.get("Sensor_right");
+       // Sensor_red  = hwMap.colorSensor.get("Sensor_left");
+        Gyro  = hwMap.gyroSensor.get("gyro");
 
         // Set all motors to zero power
-        //h
-        leftMotor.setPower(1.0);
-        rightMotor.setPower(1.0);
-
-        lift_motor_r.setPower(0);
-        lift_motor_l1.setPower(0);
-
-        catMotor.setPower(0);
-
+        leftMotor.setPower(0.0);
+        rightMotor.setPower(0.0);
+        catMotor.setPower(0.0);
+        sensorMotor.setPower(0.0);
         //  armMotor.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-     //   lift_motor_r.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-     //   lift_motor_l1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         catMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //   armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+     //   armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
      /*   leftClaw = hwMap.servo.get("left_hand");
@@ -119,10 +103,8 @@ public class HardwarePushbot10720
         if (remaining > 0)
             Thread.sleep(remaining);
 
-        // Reset the cycle clock for the next pass..
+        // Reset the cycle clock for the next pass.
         period.reset();
     }
 }
-
-
 
